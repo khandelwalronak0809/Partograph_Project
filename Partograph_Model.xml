@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+
+const int N = 12 ;
+int __reach__=0;
+typedef int[4,N-1] readings ;
+typedef int[10,20] read_pulse ;
+typedef int[20,30] read_fhr ;
+
+chan read[N];
+broadcast chan note;
+</declaration>
+	<template>
+		<name x="5" y="5">Cervical_Dilation</name>
+		<declaration>// Place local declarations here.
+
+clock x ;
+int t = 0;
+int d = 0 , pd = 0;
+</declaration>
+		<location id="id0" x="1207" y="-858">
+			<name x="1225" y="-884">Normal</name>
+			<label kind="invariant" x="1225" y="-867">x&lt;=60</label>
+		</location>
+		<location id="id1" x="1087" y="-841">
+			<name x="1104" y="-850">End</name>
+		</location>
+		<location id="id2" x="985" y="-807">
+			<name x="934" y="-816">Error</name>
+			<urgent/>
+		</location>
+		<location id="id3" x="875" y="-807">
+			<name x="833" y="-798">Emergency</name>
+			<label kind="invariant" x="849" y="-781">x&lt;=60</label>
+		</location>
+		<location id="id4" x="612" y="-815">
+			<name x="561" y="-840">Alarm</name>
+			<label kind="invariant" x="544" y="-823">x&lt;=60</label>
+		</location>
+		<location id="id5" x="1070" y="-1267">
+			<name x="1096" y="-1283">OtherActivity_N</name>
+			<label kind="invariant" x="1096" y="-1266">x&lt;=60</label>
+		</location>
+		<location id="id6" x="875" y="-1241">
+			<name x="807" y="-1266">Reading</name>
+			<label kind="invariant" x="757" y="-1249">x&lt;=15 &amp;&amp; t&lt;=12</label>
+		</location>
+		<location id="id7" x="875" y="-1377">
+			<name x="865" y="-1411">Start</name>
+			<label kind="invariant" x="892" y="-1394">x&lt;=60</label>
+		</location>
+		<init ref="id7"/>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id6"/>
+			<nail x="986" y="-986"/>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id1"/>
+			<label kind="select" x="1003" y="-909">e:readings</label>
+			<label kind="guard" x="1003" y="-892">t&gt;=12</label>
+			<label kind="assignment" x="1003" y="-875">pd=e</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id2"/>
+			<label kind="select" x="892" y="-1003">e:readings</label>
+			<label kind="guard" x="892" y="-977">(pd&gt;e or e&gt;10) &amp;&amp; t&lt;12</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id3"/>
+			<label kind="select" x="731" y="-926">e:readings</label>
+			<label kind="guard" x="689" y="-909">e+2&lt;t&amp;&amp;e&gt;=pd &amp;&amp;e&lt;=10
+&amp;&amp;t&lt;12 &amp;&amp; x&gt;0</label>
+			<label kind="synchronisation" x="731" y="-867">read[e]?</label>
+			<label kind="assignment" x="731" y="-850">d=e</label>
+			<nail x="782" y="-1028"/>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id4"/>
+			<label kind="select" x="552" y="-1181">e:readings</label>
+			<label kind="guard" x="561" y="-1156">e&lt;t &amp;&amp; (e+2)&gt;=t
+&amp;&amp; e&gt;=pd&amp;&amp;e&lt;=10
+&amp;&amp; t&lt;12 &amp;&amp; x&gt;0</label>
+			<label kind="synchronisation" x="553" y="-1096">read[e]?</label>
+			<label kind="assignment" x="553" y="-1079">d=e</label>
+			<nail x="654" y="-1104"/>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id0"/>
+			<label kind="select" x="1164" y="-1130">e:readings</label>
+			<label kind="guard" x="1164" y="-1113">e&gt;=pd&amp;&amp;e&lt;=10&amp;&amp;e&gt;=t&amp;&amp;t&lt;12 &amp;&amp; x&gt;0</label>
+			<label kind="synchronisation" x="1164" y="-1096">read[e]?</label>
+			<label kind="assignment" x="1164" y="-1079">d=e</label>
+			<nail x="1087" y="-1130"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id6"/>
+			<label kind="guard" x="825" y="-1079">x == 60</label>
+			<label kind="synchronisation" x="833" y="-1062">note!</label>
+			<label kind="assignment" x="816" y="-1045">x=0,t+=1,pd=d</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id6"/>
+			<label kind="guard" x="697" y="-1096">x==60</label>
+			<label kind="synchronisation" x="697" y="-1079">note!</label>
+			<label kind="assignment" x="688" y="-1062">x=0,t+=1,pd=d</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id6"/>
+			<label kind="guard" x="1037" y="-1003">x == 60</label>
+			<label kind="synchronisation" x="1037" y="-1019">note!</label>
+			<label kind="assignment" x="1037" y="-986">x=0,t+=1,pd=d</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id6"/>
+			<label kind="guard" x="1002" y="-1301">x==60</label>
+			<label kind="synchronisation" x="960" y="-1309">note!</label>
+			<label kind="assignment" x="892" y="-1301">x=0,t+=1</label>
+			<nail x="968" y="-1292"/>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id5"/>
+			<label kind="guard" x="968" y="-1233">x&gt;=15&amp;&amp;t&lt;12</label>
+			<nail x="977" y="-1233"/>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="guard" x="816" y="-1360">x == 60</label>
+			<label kind="synchronisation" x="833" y="-1343">note!</label>
+			<label kind="assignment" x="773" y="-1326">x=0,pd=4,t+=1,d=4</label>
+		</transition>
+	</template>
+	<template>
+		<name>Other_readings</name>
+		<declaration>clock p;
+int count_pulse=0,count_fhr=0;
+int pul=13,fhr=23;
+
+bool pulse_correct(read_pulse a){
+    if(a&lt;13 || a&gt;17){
+        return false;
+    }
+    else{
+        return true;
+    }
+}
+
+bool fhr_correct(read_fhr a){
+    if(a&lt;23 || a&gt;27){
+        return false;
+    }
+    else{
+        return true;
+    }
+}
+
+int pulse_count(int a,read_pulse b){
+    if(pulse_correct(b)){
+        return a;
+    }
+    else{
+        return a+1;
+    }
+}
+
+int fhr_count(int a,read_fhr b){
+    if(fhr_correct(b)){
+        return a;
+    }
+    else{
+        return a+1;
+    }
+}
+    
+
+</declaration>
+		<location id="id8" x="331" y="204">
+			<name x="348" y="187">Forgot_Reading</name>
+			<label kind="invariant" x="314" y="212">p&lt;=60</label>
+		</location>
+		<location id="id9" x="510" y="-34">
+			<name x="500" y="-68">Start</name>
+			<label kind="invariant" x="500" y="-17">p&lt;=30</label>
+		</location>
+		<location id="id10" x="314" y="-34">
+			<name x="297" y="-68">Read</name>
+			<label kind="invariant" x="306" y="-17">p&lt;=5</label>
+		</location>
+		<location id="id11" x="-263" y="-204">
+			<name x="-273" y="-238">Error</name>
+			<urgent/>
+		</location>
+		<location id="id12" x="-391" y="85">
+			<name x="-468" y="77">Correct</name>
+			<label kind="invariant" x="-459" y="94">p&lt;=60</label>
+		</location>
+		<init ref="id9"/>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id10"/>
+			<label kind="guard" x="195" y="127">p==60</label>
+			<label kind="assignment" x="68" y="144">p=0,count_pulse=0,count_fhr=0</label>
+			<nail x="221" y="85"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id8"/>
+			<label kind="guard" x="450" y="76">p==5 or count_pulse==5 or count_fhr==5</label>
+			<nail x="459" y="68"/>
+		</transition>
+		<transition>
+			<source ref="id12"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-102" y="85">p==60</label>
+			<label kind="assignment" x="-161" y="102">p=0,count_pulse=0,count_fhr=0</label>
+			<nail x="195" y="68"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id12"/>
+			<label kind="select" x="-450" y="-25">pulse_read:read_pulse,fhr_read:read_fhr</label>
+			<label kind="guard" x="-442" y="0">pulse_correct(pulse_read) and fhr_correct(fhr_read)</label>
+			<label kind="assignment" x="-416" y="25">pul=pulse_read,fhr=fhr_read</label>
+		</transition>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id10"/>
+			<label kind="assignment" x="25" y="-195">pul=13,fhr=23</label>
+			<nail x="178" y="-153"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id11"/>
+			<label kind="select" x="-535" y="-127">pulse_read:read_pulse,fhr_read:read_fhr</label>
+			<label kind="guard" x="-578" y="-102">count_pulse&lt;5 and count_fhr&lt;5 and (!pulse_correct(pulse_read) or !fhr_correct(fhr_read))</label>
+			<label kind="assignment" x="-646" y="-76">count_pulse = pulse_count(count_pulse,pulse_read),count_fhr=fhr_count(count_fhr,fhr_read),pul=pulse_read,fhr=fhr_read</label>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id10"/>
+			<label kind="guard" x="450" y="-59">p==30</label>
+			<label kind="assignment" x="459" y="-34">p=0</label>
+		</transition>
+	</template>
+	<template>
+		<name>User</name>
+		<parameter>const readings v</parameter>
+		<location id="id13" x="-15" y="-85">
+			<name x="-8" y="-76">noting</name>
+		</location>
+		<location id="id14" x="-17" y="-255">
+			<name x="-27" y="-289">idle</name>
+		</location>
+		<init ref="id14"/>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id14"/>
+			<label kind="synchronisation" x="51" y="-187">read[v]!</label>
+			<nail x="42" y="-178"/>
+		</transition>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id13"/>
+			<label kind="synchronisation" x="-119" y="-187">note?</label>
+			<nail x="-76" y="-170"/>
+		</transition>
+	</template>
+	<system>system Cervical_Dilation,User;
+
+
+    </system>
+	<queries>
+		<query>
+			<formula>A[] Other_readings.Error imply (Other_readings.count_pulse&lt;=5 and Other_readings.count_fhr&lt;=5 and ((Other_readings.pul&lt;13 or Other_readings.pul&gt;17) or (Other_readings.fhr&lt;23 or Other_readings.fhr&gt;27)))
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] Other_readings.count_pulse&lt;=5 and Other_readings.count_fhr&lt;=5 and ((Other_readings.pul&lt;13 or Other_readings.pul&gt;17) or (Other_readings.fhr&lt;23 or Other_readings.fhr&gt;27)) imply Other_readings.Error
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] forall (i:readings) User(i).idle and Cervical_Dilation.Error imply i&lt;Cervical_Dilation.pd
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] forall (i:readings) User(i).idle and Cervical_Dilation.Emergency imply ((i&gt;=Cervical_Dilation.pd) and (i&lt;10) and (i&lt;Cervical_Dilation.t - 2) and (Cervical_Dilation.t&lt;=12 and Cervical_Dilation.t&gt;0))
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] forall (i:readings) User(i).idle and Cervical_Dilation.Alarm imply ((i&gt;=Cervical_Dilation.pd) and (i&lt;10) and (i&lt;Cervical_Dilation.t) and (i+2&gt;=Cervical_Dilation.t) and (Cervical_Dilation.t&lt;=12 and Cervical_Dilation.t&gt;0))
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] forall(i:readings) User(i).idle and Cervical_Dilation.Normal imply ((i&gt;=Cervical_Dilation.pd) and i&lt;10 and (Cervical_Dilation.t&lt;=12 and Cervical_Dilation.t&gt;0) and (i&gt;=Cervical_Dilation.t))
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] forall (i : readings) User(i).idle and (i&gt;=Cervical_Dilation.pd) and (i&lt;10) and (i&lt;Cervical_Dilation.t - 2) and (Cervical_Dilation.t&lt;=12 and Cervical_Dilation.t&gt;0) imply (Cervical_Dilation.Emergency)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] forall (i : readings) User(i).idle and (i&gt;=Cervical_Dilation.pd) and (i&lt;10) and (i&lt;Cervical_Dilation.t) and (i+2&gt;=Cervical_Dilation.t) and (Cervical_Dilation.t&lt;=12 and Cervical_Dilation.t&gt;0) imply (Cervical_Dilation.Alarm)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] forall (i : readings) User(i).idle and (i&gt;=Cervical_Dilation.pd) and (i&lt;10) and (i&gt;=Cervical_Dilation.t) and (Cervical_Dilation.t&lt;=12 and Cervical_Dilation.t&gt;0) imply (Cervical_Dilation.Normal)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Cervical_Dilation.OtherActivity_N --&gt;   (Cervical_Dilation.Reading and Cervical_Dilation.x ==0)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Cervical_Dilation.Emergency --&gt;  (Cervical_Dilation.Reading and Cervical_Dilation.x ==0)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Cervical_Dilation.Start --&gt;  (Cervical_Dilation.Reading and Cervical_Dilation.x ==0)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Cervical_Dilation.Alarm --&gt; (Cervical_Dilation.Reading and Cervical_Dilation.x == 0)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Cervical_Dilation.Normal --&gt; (Cervical_Dilation.Reading and Cervical_Dilation.x == 0)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] forall (i :readings) User(i).idle and (i&lt;Cervical_Dilation.pd) imply Cervical_Dilation.Error
+			</formula>
+			<comment>
+			</comment>
+		</query>
+	</queries>
+</nta>

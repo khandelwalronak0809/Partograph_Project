@@ -1,0 +1,2 @@
+The model is present in Partograph_Model.xml file.
+The properties needed to prove the correctness of the application are included in the Project_Report.pdf. These properties can be verified by copying them to verifier of the uppaal software and running the model on these properties one by one.
